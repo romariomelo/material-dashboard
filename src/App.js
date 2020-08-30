@@ -19,7 +19,7 @@ const App = () => {
       setEscola(response[0]);
     };
     init();
-  }, [escola]);
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
