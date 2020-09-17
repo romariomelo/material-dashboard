@@ -20,7 +20,7 @@ const Menu = [
   },
   {
     icon: BookIcon,
-    title: 'Acadêmicossss',
+    title: 'Acadêmico',
     buttonsColor: '#f8ac59',
     textColor: '#ffffff',
     submenu: [

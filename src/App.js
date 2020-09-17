@@ -16,7 +16,7 @@ const App = () => {
   React.useEffect(() => {
     const init = async () => {
       const response = await getEscola();
-      setEscola(response[0]);
+      setEscola(response);
     };
     init();
   }, []);

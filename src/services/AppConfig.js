@@ -1,6 +1,6 @@
 const AppConfig = {
-  WsbaseUrl: 'https://webservice.colegiotimbaubense.com.br',
-  AppBaseUrl: 'http://aluno.colegiotimbaubense.com.br'
+  WsbaseUrl: 'http://webservice.atual.romariomelo.com',
+  AppBaseUrl: 'http://aluno.atual.romariomelo.com'
 };
 
 export default AppConfig;
