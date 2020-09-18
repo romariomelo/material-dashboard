@@ -10,13 +10,22 @@ import {
   Link,
   TextField,
   Typography,
-  makeStyles
+  makeStyles,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Slide
 } from '@material-ui/core';
-import FacebookIcon from 'src/icons/Facebook';
-import GoogleIcon from 'src/icons/Google';
 import Page from 'src/components/Page';
+import Login from 'src/services/Login';
 
-const useStyles = makeStyles((theme) => ({
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+const useStyles = makeStyles(theme => ({
   root: {
     backgroundColor: theme.palette.background.dark,
     height: '100%',
@@ -29,11 +38,11 @@ const LoginView = () => {
   const classes = useStyles();
   const navigate = useNavigate();
 
+  const [open, setOpen] = React.useState(false);
+  const [mensagem, setMensagem] = React.useState("");
+
   return (
-    <Page
-      className={classes.root}
-      title="Login"
-    >
+    <Page className={classes.root} title="Login">
       <Box
         display="flex"
         flexDirection="column"
@@ -43,15 +52,31 @@ const LoginView = () => {
         <Container maxWidth="sm">
           <Formik
             initialValues={{
-              email: 'demo@devias.io',
-              password: 'Password123'
+              email: '',
+              password: ''
             }}
             validationSchema={Yup.object().shape({
-              email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
-              password: Yup.string().max(255).required('Password is required')
+              email: Yup.string()
+                .max(255)
+                .required('E-mail ou CPF obrigatório'),
+              password: Yup.string()
+                .max(255)
+                .required('Senha obrigatória')
             })}
-            onSubmit={() => {
-              navigate('/', { replace: true });
+            onSubmit={async (values) => {
+              const response = await Login(values.email, values.password);
+              if (response.status === 500) {
+                setMensagem(response.data.message);
+                setOpen(true);
+              }
+              if (response.status === 401) {
+                setMensagem(response.data.message);
+                setOpen(true);
+                return;
+              }
+              if (response.status === 200) {
+                navigate('/', { replace: true });
+              }
             }}
           >
             {({
@@ -65,78 +90,29 @@ const LoginView = () => {
             }) => (
               <form onSubmit={handleSubmit}>
                 <Box mb={3}>
-                  <Typography
-                    color="textPrimary"
-                    variant="h2"
-                  >
-                    Sign in
+                  <Typography color="textPrimary" variant="h2">
+                    Login
                   </Typography>
                   <Typography
                     color="textSecondary"
                     gutterBottom
                     variant="body2"
                   >
-                    Sign in on the internal platform
+                    Faça login para ter acesso ao sistema
                   </Typography>
                 </Box>
-                <Grid
-                  container
-                  spacing={3}
-                >
-                  <Grid
-                    item
-                    xs={12}
-                    md={6}
-                  >
-                    <Button
-                      color="primary"
-                      fullWidth
-                      startIcon={<FacebookIcon />}
-                      onClick={handleSubmit}
-                      size="large"
-                      variant="contained"
-                    >
-                      Login with Facebook
-                    </Button>
-                  </Grid>
-                  <Grid
-                    item
-                    xs={12}
-                    md={6}
-                  >
-                    <Button
-                      fullWidth
-                      startIcon={<GoogleIcon />}
-                      onClick={handleSubmit}
-                      size="large"
-                      variant="contained"
-                    >
-                      Login with Google
-                    </Button>
-                  </Grid>
-                </Grid>
-                <Box
-                  mt={3}
-                  mb={1}
-                >
-                  <Typography
-                    align="center"
-                    color="textSecondary"
-                    variant="body1"
-                  >
-                    or login with email address
-                  </Typography>
-                </Box>
+                <Grid container spacing={3}></Grid>
+                <Box mt={3} mb={1}></Box>
                 <TextField
                   error={Boolean(touched.email && errors.email)}
                   fullWidth
                   helperText={touched.email && errors.email}
-                  label="Email Address"
+                  label="CPF ou E-mail"
                   margin="normal"
                   name="email"
                   onBlur={handleBlur}
                   onChange={handleChange}
-                  type="email"
+                  type="text"
                   value={values.email}
                   variant="outlined"
                 />
@@ -144,7 +120,7 @@ const LoginView = () => {
                   error={Boolean(touched.password && errors.password)}
                   fullWidth
                   helperText={touched.password && errors.password}
-                  label="Password"
+                  label="Senha"
                   margin="normal"
                   name="password"
                   onBlur={handleBlur}
@@ -162,21 +138,17 @@ const LoginView = () => {
                     type="submit"
                     variant="contained"
                   >
-                    Sign in now
+                    Acessar
                   </Button>
                 </Box>
-                <Typography
-                  color="textSecondary"
-                  variant="body1"
-                >
-                  Don&apos;t have an account?
-                  {' '}
-                  <Link
-                    component={RouterLink}
-                    to="/register"
-                    variant="h6"
-                  >
-                    Sign up
+                <Typography color="textSecondary" variant="body1">
+                  <Link component={RouterLink} to="/register" variant="h6">
+                    Esqueceu a senha?
+                  </Link>
+                </Typography>
+                <Typography color="textSecondary" variant="body1">
+                  <Link component={RouterLink} to="/register" variant="h6">
+                    Primeiro acesso.
                   </Link>
                 </Typography>
               </form>
@@ -184,6 +156,29 @@ const LoginView = () => {
           </Formik>
         </Container>
       </Box>
+
+
+      <Dialog
+        open={open}
+        TransitionComponent={Transition}
+        keepMounted
+        fullWidth
+        onClose={() => setOpen(false)}
+        aria-labelledby="alert-dialog-slide-title"
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle id="alert-dialog-slide-title">Não foi possível entrar no sistema.</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            {mensagem}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpen(false)} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Page>
   );
 };

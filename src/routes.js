@@ -7,11 +7,12 @@ import LoginView from 'src/views/auth/LoginView';
 import NotFoundView from 'src/views/errors/NotFoundView';
 import RegisterView from 'src/views/auth/RegisterView';
 import MainView from "src/views/main/MainView";
+import ProtectedRoutes from 'src/routes/ProtectedRoutes'
 
 const routes = [
   {
     path: '/',
-    element: <DashboardLayout />,
+    element: <ProtectedRoutes component={DashboardLayout} />,
     children: [
       { path: '', element: <MainView /> },
       { path: 'customers', element: <CustomerListView /> },

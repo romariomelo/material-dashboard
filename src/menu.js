@@ -25,7 +25,7 @@ const Menu = [
     textColor: '#ffffff',
     submenu: [
       {
-        href: '/customers',
+        href: '/academico/diario-de-turma',
         icon: ImportContactsIcon,
         title: 'Diário de Turma',
       },
